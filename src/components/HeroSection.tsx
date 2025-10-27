@@ -14,31 +14,31 @@ const HeroSection = () => {
         <div className="mx-auto max-w-4xl">
           <div className="mb-6 inline-flex items-center justify-center rounded-full bg-accent/20 px-6 py-2 backdrop-blur-sm">
             <Heart className="mr-2 h-5 w-5 text-accent-foreground" />
-            <span className="text-sm font-semibold text-accent-foreground">Heart Health Awareness</span>
+            <span className="text-sm font-semibold text-accent-foreground">Cardiovascular Health Awareness</span>
           </div>
           
           <h1 className="mb-6 text-5xl font-bold leading-tight text-primary-foreground md:text-7xl lg:text-8xl">
-            Heart Attacks in Your{" "}
-            <span className="text-accent">Neighborhood</span>
+            Stroke Mortality in Your{" "}
+            <span className="text-accent">Community</span>
           </h1>
           
           <p className="mb-8 text-xl text-primary-foreground/90 md:text-2xl">
-            Every year, over 800,000 Americans experience a heart attack. 
-            Discover the impact in your community and learn how to protect your heart.
+            Understanding stroke patterns across the United States. 
+            Explore the data in your area and learn about cardiovascular health.
           </p>
           
           <div className="mb-12 grid gap-6 md:grid-cols-3">
             <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-sm transition-transform hover:scale-105">
-              <div className="mb-2 text-4xl font-bold text-accent-foreground">805,000</div>
-              <div className="text-sm text-primary-foreground/80">Heart attacks annually in the US</div>
+              <div className="mb-2 text-4xl font-bold text-accent-foreground">160,000+</div>
+              <div className="text-sm text-primary-foreground/80">Stroke deaths annually in the US</div>
             </div>
             <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-sm transition-transform hover:scale-105">
-              <div className="mb-2 text-4xl font-bold text-accent-foreground">1 in 5</div>
-              <div className="text-sm text-primary-foreground/80">Heart attacks are silent</div>
+              <div className="mb-2 text-4xl font-bold text-accent-foreground">1 in 6</div>
+              <div className="text-sm text-primary-foreground/80">Deaths from cardiovascular disease is due to stroke</div>
             </div>
             <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-sm transition-transform hover:scale-105">
-              <div className="mb-2 text-4xl font-bold text-accent-foreground">47%</div>
-              <div className="text-sm text-primary-foreground/80">Of sudden cardiac deaths occur outside a hospital</div>
+              <div className="mb-2 text-4xl font-bold text-accent-foreground">87%</div>
+              <div className="text-sm text-primary-foreground/80">Of strokes are ischemic strokes</div>
             </div>
           </div>
           

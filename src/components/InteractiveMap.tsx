@@ -6,15 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-
-// Sample data structure - will be replaced with actual Excel data
-const sampleHeartData = [
-  { lat: 40.7128, lon: -74.0060, location: "New York, NY", cases: 1250, rate: 145 },
-  { lat: 34.0522, lon: -118.2437, location: "Los Angeles, CA", cases: 980, rate: 132 },
-  { lat: 41.8781, lon: -87.6298, location: "Chicago, IL", cases: 875, rate: 152 },
-  { lat: 29.7604, lon: -95.3698, location: "Houston, TX", cases: 720, rate: 138 },
-  { lat: 33.4484, lon: -112.0740, location: "Phoenix, AZ", cases: 640, rate: 128 },
-];
+import { parseStrokeCSV, aggregateDataByLocation } from "@/utils/csvParser";
+import csvData from "@/data/stroke-mortality-data.csv?url";
 
 const InteractiveMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -22,6 +15,19 @@ const InteractiveMap = () => {
   const [mapboxToken, setMapboxToken] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isTokenSet, setIsTokenSet] = useState(false);
+  const [strokeData, setStrokeData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      const data = await parseStrokeCSV(csvData);
+      const aggregated = aggregateDataByLocation(data);
+      setStrokeData(aggregated);
+      setIsLoading(false);
+    };
+    loadData();
+  }, []);
 
   const initializeMap = (token: string) => {
     if (!mapContainer.current || !token) return;
@@ -40,15 +46,15 @@ const InteractiveMap = () => {
 
       map.current.on("load", () => {
         // Add markers for each location
-        sampleHeartData.forEach((data) => {
+        strokeData.forEach((data) => {
           const el = document.createElement("div");
           el.className = "w-8 h-8 bg-accent rounded-full border-4 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform";
           
           const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
             `<div class="p-2">
               <h3 class="font-bold text-base mb-1">${data.location}</h3>
-              <p class="text-sm text-gray-600">Heart Attack Cases: ${data.cases}</p>
-              <p class="text-sm text-gray-600">Rate per 100k: ${data.rate}</p>
+              <p class="text-sm text-gray-600">Data Points: ${data.count}</p>
+              <p class="text-sm text-gray-600">Avg Rate per 100k: ${data.avgRate}</p>
             </div>`
           );
 
@@ -58,7 +64,7 @@ const InteractiveMap = () => {
             .addTo(map.current!);
         });
 
-        toast.success("Map loaded successfully!");
+        toast.success("Map loaded successfully with real data!");
       });
 
       setIsTokenSet(true);
@@ -93,10 +99,10 @@ const InteractiveMap = () => {
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-foreground">
-              Heart Attack Data by Location
+              Stroke Mortality Data by Location
             </h2>
             <p className="text-lg text-muted-foreground">
-              Explore heart attack statistics in your area
+              Explore stroke mortality statistics across the United States
             </p>
           </div>
 
@@ -163,32 +169,34 @@ const InteractiveMap = () => {
             />
           </Card>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-primary mb-2">
-                  {sampleHeartData.reduce((sum, d) => sum + d.cases, 0).toLocaleString()}
-                </div>
-                <div className="text-sm text-muted-foreground">Total Cases Tracked</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-secondary mb-2">
-                  {sampleHeartData.length}
-                </div>
-                <div className="text-sm text-muted-foreground">Locations Monitored</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-accent mb-2">
-                  {Math.round(sampleHeartData.reduce((sum, d) => sum + d.rate, 0) / sampleHeartData.length)}
-                </div>
-                <div className="text-sm text-muted-foreground">Avg Rate per 100k</div>
-              </CardContent>
-            </Card>
-          </div>
+          {!isLoading && strokeData.length > 0 && (
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-3xl font-bold text-primary mb-2">
+                    {strokeData.reduce((sum, d) => sum + d.count, 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Data Points</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-3xl font-bold text-secondary mb-2">
+                    {strokeData.length.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Locations Tracked</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-3xl font-bold text-accent mb-2">
+                    {Math.round(strokeData.reduce((sum, d) => sum + d.avgRate, 0) / strokeData.length)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Avg Rate per 100k</div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </section>

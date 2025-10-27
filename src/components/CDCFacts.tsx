@@ -4,27 +4,27 @@ import { Card, CardContent } from "@/components/ui/card";
 const facts = [
   {
     icon: Heart,
-    title: "Leading Cause of Death",
-    description: "Heart disease is the leading cause of death in the United States, responsible for about 1 in 5 deaths.",
+    title: "Major Health Concern",
+    description: "Stroke is a leading cause of death in the United States and a major cause of serious long-term disability.",
     source: "CDC, 2024"
   },
   {
     icon: AlertTriangle,
-    title: "Warning Signs",
-    description: "Heart attack symptoms can include chest pain, shortness of breath, cold sweats, nausea, and lightheadedness.",
-    source: "American Heart Association"
+    title: "Warning Signs - FAST",
+    description: "Face drooping, Arm weakness, Speech difficulty - Time to call 911. Other signs include sudden numbness, confusion, trouble seeing, or severe headache.",
+    source: "American Stroke Association"
   },
   {
     icon: Activity,
     title: "Risk Factors",
-    description: "High blood pressure, high cholesterol, smoking, diabetes, and obesity significantly increase heart attack risk.",
-    source: "CDC Heart Disease Facts"
+    description: "High blood pressure, smoking, diabetes, high cholesterol, obesity, and atrial fibrillation significantly increase stroke risk.",
+    source: "CDC Stroke Facts"
   },
   {
     icon: TrendingUp,
-    title: "Survival Rates",
-    description: "About 90% of people who have a heart attack survive if they receive immediate medical attention.",
-    source: "American Heart Association, 2024"
+    title: "Prevention & Treatment",
+    description: "Up to 80% of strokes can be prevented. Quick treatment with clot-busting drugs can minimize brain damage if given within hours of symptoms.",
+    source: "American Stroke Association, 2024"
   }
 ];
 
@@ -34,10 +34,10 @@ const CDCFacts = () => {
       <div className="container px-4">
         <div className="mx-auto max-w-6xl text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
-            Heart Attack Facts & Statistics
+            Stroke Facts & Statistics
           </h2>
           <p className="text-lg text-muted-foreground">
-            Critical information from the CDC and American Heart Association
+            Critical information from the CDC and American Stroke Association
           </p>
         </div>
         
@@ -70,14 +70,14 @@ const CDCFacts = () => {
                   <Heart className="h-6 w-6 text-accent" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold mb-3 text-foreground">Time Is Muscle</h3>
+                  <h3 className="text-2xl font-bold mb-3 text-foreground">Time Lost Is Brain Lost</h3>
                   <p className="text-muted-foreground mb-4">
-                    Every minute counts during a heart attack. The faster you get treatment, 
-                    the better your chances of survival and limiting heart damage. 
-                    Call 911 immediately if you experience heart attack symptoms.
+                    Every second counts during a stroke. The faster you get treatment, 
+                    the better your chances of survival and recovery. Brain cells die rapidly during a stroke. 
+                    Call 911 immediately if you notice any stroke symptoms - don't drive to the hospital.
                   </p>
                   <p className="text-sm font-semibold text-accent">
-                    Don't wait – act fast and save a life!
+                    Remember FAST - Face, Arms, Speech, Time to call 911!
                   </p>
                 </div>
               </div>

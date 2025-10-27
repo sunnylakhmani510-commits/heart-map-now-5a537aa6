@@ -1,16 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-
-// Sample data - will be replaced with actual Excel data
-const heartAttackData = [
-  { location: "New York", cases: 1250, rate: 145, age_group: "65+" },
-  { location: "Los Angeles", cases: 980, rate: 132, age_group: "55-64" },
-  { location: "Chicago", cases: 875, rate: 152, age_group: "65+" },
-  { location: "Houston", cases: 720, rate: 138, age_group: "45-54" },
-  { location: "Phoenix", cases: 640, rate: 128, age_group: "55-64" },
-];
+import { parseStrokeCSV } from "@/utils/csvParser";
+import csvData from "@/data/stroke-mortality-data.csv?url";
 
 const ageDistributionData = [
   { name: "Under 45", value: 15, color: "hsl(var(--chart-1))" },
@@ -35,17 +28,56 @@ const monthlyTrendData = [
 ];
 
 const DataCharts = () => {
-  const [filterLocation, setFilterLocation] = useState<string>("all");
-  const [filterAgeGroup, setFilterAgeGroup] = useState<string>("all");
+  const [filterState, setFilterState] = useState<string>("all");
+  const [filterSex, setFilterSex] = useState<string>("all");
+  const [strokeData, setStrokeData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const locations = ["all", ...Array.from(new Set(heartAttackData.map(d => d.location)))];
-  const ageGroups = ["all", ...Array.from(new Set(heartAttackData.map(d => d.age_group)))];
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      const data = await parseStrokeCSV(csvData);
+      setStrokeData(data);
+      setIsLoading(false);
+    };
+    loadData();
+  }, []);
 
-  const filteredData = heartAttackData.filter(item => {
-    const locationMatch = filterLocation === "all" || item.location === filterLocation;
-    const ageMatch = filterAgeGroup === "all" || item.age_group === filterAgeGroup;
-    return locationMatch && ageMatch;
-  });
+  useEffect(() => {
+    if (strokeData.length === 0) return;
+
+    let filtered = strokeData.filter(item => {
+      const stateMatch = filterState === "all" || item.locationAbbr === filterState;
+      const sexMatch = filterSex === "all" || item.sex === filterSex;
+      return stateMatch && sexMatch;
+    });
+
+    // Aggregate by state
+    const stateMap = new Map<string, { totalValue: number; count: number }>();
+    filtered.forEach(item => {
+      if (!stateMap.has(item.locationAbbr)) {
+        stateMap.set(item.locationAbbr, { totalValue: 0, count: 0 });
+      }
+      const entry = stateMap.get(item.locationAbbr)!;
+      entry.totalValue += item.dataValue || 0;
+      entry.count += 1;
+    });
+
+    const aggregated = Array.from(stateMap.entries())
+      .map(([state, data]) => ({
+        state,
+        avgRate: Math.round(data.totalValue / data.count),
+        count: data.count,
+      }))
+      .sort((a, b) => b.avgRate - a.avgRate)
+      .slice(0, 10);
+
+    setChartData(aggregated);
+  }, [strokeData, filterState, filterSex]);
+
+  const states = ["all", ...Array.from(new Set(strokeData.map(d => d.locationAbbr)))].sort();
+  const sexOptions = ["all", ...Array.from(new Set(strokeData.map(d => d.sex)))];
 
   return (
     <section className="py-20 bg-background">
@@ -53,45 +85,45 @@ const DataCharts = () => {
         <div className="mx-auto max-w-7xl">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-foreground">
-              Data Visualizations
+              Stroke Mortality Data Visualizations
             </h2>
             <p className="text-lg text-muted-foreground">
-              Interactive charts showing heart attack patterns and trends
+              Interactive charts showing stroke mortality patterns across the United States
             </p>
           </div>
 
           <Card className="mb-8 bg-muted/30">
             <CardHeader>
               <CardTitle>Filter Data</CardTitle>
-              <CardDescription>Customize the data view by location and age group</CardDescription>
+              <CardDescription>Customize the data view by state and sex</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Location</label>
-                  <Select value={filterLocation} onValueChange={setFilterLocation}>
+                  <label className="text-sm font-medium mb-2 block">State</label>
+                  <Select value={filterState} onValueChange={setFilterState}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select location" />
+                      <SelectValue placeholder="Select state" />
                     </SelectTrigger>
                     <SelectContent>
-                      {locations.map(loc => (
-                        <SelectItem key={loc} value={loc}>
-                          {loc === "all" ? "All Locations" : loc}
+                      {states.map(state => (
+                        <SelectItem key={state} value={state}>
+                          {state === "all" ? "All States" : state}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Age Group</label>
-                  <Select value={filterAgeGroup} onValueChange={setFilterAgeGroup}>
+                  <label className="text-sm font-medium mb-2 block">Sex</label>
+                  <Select value={filterSex} onValueChange={setFilterSex}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select age group" />
+                      <SelectValue placeholder="Select sex" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ageGroups.map(age => (
-                        <SelectItem key={age} value={age}>
-                          {age === "all" ? "All Age Groups" : age}
+                      {sexOptions.map(sex => (
+                        <SelectItem key={sex} value={sex}>
+                          {sex === "all" ? "All" : sex}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -101,109 +133,48 @@ const DataCharts = () => {
             </CardContent>
           </Card>
 
-          <div className="grid gap-6 lg:grid-cols-2 mb-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Heart Attack Cases by Location</CardTitle>
-                <CardDescription>Total reported cases in major cities</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={filteredData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="location" stroke="hsl(var(--muted-foreground))" />
-                    <YAxis stroke="hsl(var(--muted-foreground))" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: "hsl(var(--card))", 
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "var(--radius)"
-                      }} 
-                    />
-                    <Legend />
-                    <Bar dataKey="cases" fill="hsl(var(--primary))" name="Cases" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading data...</p>
+            </div>
+          ) : (
+            <>
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Top 10 States by Stroke Mortality Rate</CardTitle>
+                  <CardDescription>Average mortality rate per 100,000 population</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="state" stroke="hsl(var(--muted-foreground))" />
+                      <YAxis stroke="hsl(var(--muted-foreground))" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: "hsl(var(--card))", 
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "var(--radius)"
+                        }} 
+                      />
+                      <Legend />
+                      <Bar dataKey="avgRate" fill="hsl(var(--primary))" name="Avg Rate per 100k" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Age Distribution</CardTitle>
-                <CardDescription>Percentage of heart attacks by age group</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={ageDistributionData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value }) => `${name}: ${value}%`}
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {ageDistributionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: "hsl(var(--card))", 
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "var(--radius)"
-                      }} 
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Monthly Heart Attack Trend</CardTitle>
-              <CardDescription>Cases over the past 12 months</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={monthlyTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: "hsl(var(--card))", 
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "var(--radius)"
-                    }} 
-                  />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="cases" 
-                    stroke="hsl(var(--accent))" 
-                    strokeWidth={3}
-                    name="Heart Attack Cases"
-                    dot={{ fill: "hsl(var(--accent))", r: 5 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="mt-8 bg-primary/5 border-primary/20">
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Note:</strong> The charts above show sample data for demonstration. 
-                Once you upload your Excel spreadsheet with latitude, longitude, and other data fields, 
-                these visualizations will automatically update to reflect your actual data. The system supports 
-                filtering by multiple parameters and interactive exploration of geographic patterns.
-              </p>
-            </CardContent>
-          </Card>
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-6">
+                  <p className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">Data Source:</strong> The visualizations above display real stroke mortality data 
+                    from your uploaded CSV file. The data includes {strokeData.length.toLocaleString()} data points across multiple states, 
+                    counties, and demographic categories. Use the filters above to explore specific patterns and trends.
+                  </p>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
       </div>
     </section>
