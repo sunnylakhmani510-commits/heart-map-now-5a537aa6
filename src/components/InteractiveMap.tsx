@@ -12,11 +12,10 @@ import csvData from "@/data/stroke-mortality-data.csv?url";
 const InteractiveMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isTokenSet, setIsTokenSet] = useState(false);
   const [strokeData, setStrokeData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const MAPBOX_TOKEN = "pk.eyJ1Ijoic3VubnlsYWwiLCJhIjoiY21oOTlyaXlnMGxteDJscTFrN3h2dWd0aiJ9.6LC5SfaxU5-l6K2RMlrszg";
 
   useEffect(() => {
     const loadData = async () => {
@@ -29,10 +28,16 @@ const InteractiveMap = () => {
     loadData();
   }, []);
 
-  const initializeMap = (token: string) => {
-    if (!mapContainer.current || !token) return;
+  useEffect(() => {
+    if (strokeData.length > 0 && !map.current) {
+      initializeMap();
+    }
+  }, [strokeData]);
 
-    mapboxgl.accessToken = token;
+  const initializeMap = () => {
+    if (!mapContainer.current) return;
+
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
     try {
       map.current = new mapboxgl.Map({
@@ -66,20 +71,9 @@ const InteractiveMap = () => {
 
         toast.success("Map loaded successfully with real data!");
       });
-
-      setIsTokenSet(true);
     } catch (error) {
       toast.error("Failed to initialize map. Please check your token.");
       console.error(error);
-    }
-  };
-
-  const handleTokenSubmit = () => {
-    if (mapboxToken.trim()) {
-      initializeMap(mapboxToken);
-      toast.success("Mapbox token set!");
-    } else {
-      toast.error("Please enter a valid Mapbox token");
     }
   };
 
@@ -106,41 +100,6 @@ const InteractiveMap = () => {
             </p>
           </div>
 
-          {!isTokenSet && (
-            <Card className="mb-8 border-primary/50 bg-primary/5">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Setup Required
-                </CardTitle>
-                <CardDescription>
-                  Enter your Mapbox public token to view the interactive map.{" "}
-                  <a 
-                    href="https://mapbox.com/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline font-medium"
-                  >
-                    Get your token here
-                  </a>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="pk.eyJ1IjoieW91ciB0b2tlbiBoZXJlLi4u"
-                    value={mapboxToken}
-                    onChange={(e) => setMapboxToken(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button onClick={handleTokenSubmit} className="bg-primary">
-                    Set Token
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           <div className="mb-6">
             <div className="flex gap-2">
@@ -165,7 +124,6 @@ const InteractiveMap = () => {
             <div 
               ref={mapContainer} 
               className="w-full h-[600px] rounded-lg"
-              style={{ opacity: isTokenSet ? 1 : 0.3 }}
             />
           </Card>
 
