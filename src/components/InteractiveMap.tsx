@@ -77,14 +77,43 @@ const InteractiveMap = () => {
     }
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchQuery.trim()) {
       toast.error("Please enter a location");
       return;
     }
     
-    // This will be enhanced with actual geocoding
-    toast.info(`Searching for: ${searchQuery}`);
+    if (!map.current) {
+      toast.error("Map not ready yet");
+      return;
+    }
+
+    try {
+      // Use Mapbox Geocoding API
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&country=US&types=postcode,place,region`
+      );
+      
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const [lng, lat] = data.features[0].center;
+        
+        // Fly to the location
+        map.current.flyTo({
+          center: [lng, lat],
+          zoom: 10,
+          duration: 2000
+        });
+        
+        toast.success(`Found: ${data.features[0].place_name}`);
+      } else {
+        toast.error("Location not found. Try a different search term.");
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      toast.error("Failed to search location. Please try again.");
+    }
   };
 
   return (
