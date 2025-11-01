@@ -48,7 +48,7 @@ const DataCharts = () => {
     if (strokeData.length === 0) return;
 
     let filtered = strokeData.filter(item => {
-      const stateMatch = filterState === "all" || item.locationAbbr === filterState;
+      const stateMatch = filterState === "all" || item.state === filterState;
       const sexMatch = filterSex === "all" || item.sex === filterSex;
       return stateMatch && sexMatch;
     });
@@ -56,10 +56,10 @@ const DataCharts = () => {
     // Aggregate by state
     const stateMap = new Map<string, { totalValue: number; count: number }>();
     filtered.forEach(item => {
-      if (!stateMap.has(item.locationAbbr)) {
-        stateMap.set(item.locationAbbr, { totalValue: 0, count: 0 });
+      if (!stateMap.has(item.state)) {
+        stateMap.set(item.state, { totalValue: 0, count: 0 });
       }
-      const entry = stateMap.get(item.locationAbbr)!;
+      const entry = stateMap.get(item.state)!;
       entry.totalValue += item.dataValue || 0;
       entry.count += 1;
     });
@@ -76,7 +76,7 @@ const DataCharts = () => {
     setChartData(aggregated);
   }, [strokeData, filterState, filterSex]);
 
-  const states = ["all", ...Array.from(new Set(strokeData.map(d => d.locationAbbr)))].sort();
+  const states = ["all", ...Array.from(new Set(strokeData.map(d => d.state)))].sort();
   const sexOptions = ["all", ...Array.from(new Set(strokeData.map(d => d.sex)))];
 
   return (

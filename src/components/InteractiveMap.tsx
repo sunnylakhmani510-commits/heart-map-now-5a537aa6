@@ -152,7 +152,7 @@ const InteractiveMap = () => {
           <Card className="overflow-hidden">
             <div 
               ref={mapContainer} 
-              className="w-full h-[600px] rounded-lg"
+              className="w-full h-[540px] rounded-lg"
             />
           </Card>
 
