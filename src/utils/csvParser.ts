@@ -24,7 +24,7 @@ const geocodeLocation = async (city: string, state: string): Promise<{ lat: numb
 
   try {
     const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(key)}.json?access_token=${MAPBOX_TOKEN}&country=US&types=place`
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(key)}.json?access_token=${MAPBOX_TOKEN}&country=US&types=district,place`
     );
     const data = await response.json();
     
