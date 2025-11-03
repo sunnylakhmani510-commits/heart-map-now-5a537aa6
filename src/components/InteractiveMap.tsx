@@ -60,6 +60,7 @@ const InteractiveMap = () => {
               <h3 class="font-bold text-base mb-1">${data.location}</h3>
               <p class="text-sm text-gray-600">Data Points: ${data.count}</p>
               <p class="text-sm text-gray-600">Avg Rate per 100k: ${data.avgRate}</p>
+              <p class="text-sm text-gray-600">Coordinates: ${data.lat.toFixed(4)}, ${data.lon.toFixed(4)}</p>
             </div>`
           );
 
