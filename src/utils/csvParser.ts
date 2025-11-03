@@ -23,17 +23,30 @@ const geocodeLocation = async (city: string, state: string): Promise<{ lat: numb
   }
 
   try {
+    // Try searching with district type first for counties
     const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(key)}.json?access_token=${MAPBOX_TOKEN}&country=US&types=district,place`
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(key)}.json?access_token=${MAPBOX_TOKEN}&country=US&types=district,place,region`
     );
     const data = await response.json();
     
     if (data.features && data.features.length > 0) {
-      const [lon, lat] = data.features[0].center;
+      // Look for a feature that matches the state
+      const stateAbbrev = state.toUpperCase();
+      const matchingFeature = data.features.find((feature: any) => {
+        const context = feature.context || [];
+        return context.some((ctx: any) => 
+          ctx.short_code && ctx.short_code.toUpperCase().includes(stateAbbrev)
+        ) || (feature.properties?.short_code && feature.properties.short_code.toUpperCase().includes(stateAbbrev));
+      });
+      
+      const feature = matchingFeature || data.features[0];
+      const [lon, lat] = feature.center;
       const coords = { lat, lon };
       geocodeCache.set(key, coords);
+      console.log(`Geocoded: ${key} -> ${lat}, ${lon}`);
       return coords;
     }
+    console.warn(`No geocoding results for: ${key}`);
     return null;
   } catch (error) {
     console.error('Geocoding error:', error);
