@@ -29,10 +29,10 @@ const InteractiveMap = () => {
   }, []);
 
   useEffect(() => {
-    if (strokeData.length > 0 && !map.current) {
+    if (!map.current) {
       initializeMap();
     }
-  }, [strokeData]);
+  }, []);
 
   const initializeMap = () => {
     if (!mapContainer.current) return;
@@ -50,33 +50,42 @@ const InteractiveMap = () => {
       map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
       map.current.on("load", () => {
-        // Add markers for each location
-        strokeData.forEach((data) => {
-          const el = document.createElement("div");
-          el.className = "w-8 h-8 bg-accent rounded-full border-4 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform";
-          
-          const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-            `<div class="p-2">
-              <h3 class="font-bold text-base mb-1">${data.location}</h3>
-              <p class="text-sm text-gray-600">Data Points: ${data.count}</p>
-              <p class="text-sm text-gray-600">Avg Rate per 100k: ${data.avgRate}</p>
-              <p class="text-sm text-gray-600">Coordinates: ${data.lat.toFixed(4)}, ${data.lon.toFixed(4)}</p>
-            </div>`
-          );
-
-          new mapboxgl.Marker(el)
-            .setLngLat([data.lon, data.lat])
-            .setPopup(popup)
-            .addTo(map.current!);
-        });
-
-        toast.success("Map loaded successfully with real data!");
+        toast.success("Map loaded");
       });
     } catch (error) {
       toast.error("Failed to initialize map. Please check your token.");
       console.error(error);
     }
   };
+
+  const placeMarkers = () => {
+    if (!map.current) return;
+    strokeData.forEach((data) => {
+      const el = document.createElement("div");
+      el.className = "w-8 h-8 bg-accent rounded-full border-4 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform";
+      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+        `<div class="p-2">
+          <h3 class="font-bold text-base mb-1">${data.location}</h3>
+          <p class="text-sm text-gray-600">Data Points: ${data.count}</p>
+          <p class="text-sm text-gray-600">Avg Rate per 100k: ${data.avgRate}</p>
+          <p class="text-sm text-gray-600">Coordinates: ${data.lat.toFixed(4)}, ${data.lon.toFixed(4)}</p>
+        </div>`
+      );
+      new mapboxgl.Marker(el)
+        .setLngLat([data.lon, data.lat])
+        .setPopup(popup)
+        .addTo(map.current!);
+    });
+  };
+
+  useEffect(() => {
+    if (!map.current || strokeData.length === 0) return;
+    if (map.current.loaded()) {
+      placeMarkers();
+    } else {
+      map.current.once('load', placeMarkers);
+    }
+  }, [strokeData]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -90,6 +99,20 @@ const InteractiveMap = () => {
     }
 
     try {
+      const coordMatch = searchQuery.trim().match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+      if (coordMatch) {
+        const lat = parseFloat(coordMatch[1]);
+        const lng = parseFloat(coordMatch[2]);
+        if (isFinite(lat) && isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+          map.current.flyTo({ center: [lng, lat], zoom: 10, duration: 2000 });
+          toast.success(`Moved to: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+          return;
+        } else {
+          toast.error("Invalid coordinates. Use 'lat, lon'.");
+          return;
+        }
+      }
+
       // Use Mapbox Geocoding API
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&country=US&types=postcode,place,region`
@@ -109,7 +132,7 @@ const InteractiveMap = () => {
         
         toast.success(`Found: ${data.features[0].place_name}`);
       } else {
-        toast.error("Location not found. Try a different search term.");
+        toast.error("Location not found. Try 'lat, lon' like '38.2, -85.7'.");
       }
     } catch (error) {
       console.error("Geocoding error:", error);
@@ -137,7 +160,7 @@ const InteractiveMap = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Enter zip code, city, or county..."
+                  placeholder="Enter zip code, city, county, or 'lat, lon'..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
