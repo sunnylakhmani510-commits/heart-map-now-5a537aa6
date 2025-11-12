@@ -4,21 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ArrowRight, Scale } from "lucide-react";
 import { supplements } from "@/data/supplementsData";
+import { getEvidenceBadgeColor } from "@/utils/supplementUtils";
 
 const Supplements = () => {
-  const getEvidenceBadgeColor = (evidence: string) => {
-    switch (evidence) {
-      case "Strong":
-        return "bg-secondary text-secondary-foreground";
-      case "Moderate":
-        return "bg-primary/70 text-primary-foreground";
-      case "Emerging":
-        return "bg-muted text-muted-foreground";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
   return (
     <section id="supplements" className="py-20 bg-muted/30">
       <div className="container px-4">

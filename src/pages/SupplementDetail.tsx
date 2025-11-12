@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ExternalLink, CheckCircle, AlertTriangle } from "lucide-react";
 import Footer from "@/components/Footer";
+import { getEvidenceBadgeColor } from "@/utils/supplementUtils";
 
 const SupplementDetail = () => {
   const { slug } = useParams();
@@ -26,19 +27,6 @@ const SupplementDetail = () => {
       </div>
     );
   }
-
-  const getEvidenceBadgeColor = (evidence: string) => {
-    switch (evidence) {
-      case "Strong":
-        return "bg-secondary text-secondary-foreground";
-      case "Moderate":
-        return "bg-primary/70 text-primary-foreground";
-      case "Emerging":
-        return "bg-muted text-muted-foreground";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
