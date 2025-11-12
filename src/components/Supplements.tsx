@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ArrowRight } from "lucide-react";
+import { ExternalLink, ArrowRight, Scale } from "lucide-react";
 import { supplements } from "@/data/supplementsData";
 
 const Supplements = () => {
@@ -23,14 +23,22 @@ const Supplements = () => {
     <section id="supplements" className="py-20 bg-muted/30">
       <div className="container px-4">
         <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">
-              Heart Health Supplements
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Evidence-based supplements that may support cardiovascular health. 
-              Always consult your healthcare provider before starting any supplement regimen.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-12">
+            <div className="text-center md:text-left mb-6 md:mb-0">
+              <h2 className="text-4xl font-bold mb-4 text-foreground">
+                Heart Health Supplements
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl">
+                Evidence-based supplements that may support cardiovascular health. 
+                Always consult your healthcare provider before starting any supplement regimen.
+              </p>
+            </div>
+            <Link to="/compare-supplements">
+              <Button size="lg" className="gap-2">
+                <Scale className="h-5 w-5" />
+                Compare Supplements
+              </Button>
+            </Link>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

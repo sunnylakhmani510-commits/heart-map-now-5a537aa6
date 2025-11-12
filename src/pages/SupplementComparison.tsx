@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supplementsData } from "@/data/supplementsData";
+import { supplements } from "@/data/supplementsData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,7 +20,7 @@ const SupplementComparison = () => {
     );
   };
 
-  const compareData = supplementsData.filter(s =>
+  const compareData = supplements.filter(s =>
     selectedSupplements.includes(s.slug)
   );
 
@@ -65,7 +65,7 @@ const SupplementComparison = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {supplementsData.map((supplement) => (
+              {supplements.map((supplement) => (
                 <div
                   key={supplement.slug}
                   className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors cursor-pointer"
