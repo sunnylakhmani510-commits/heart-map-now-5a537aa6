@@ -77,7 +77,7 @@ const SupplementComparison = () => {
                   />
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{supplement.name}</p>
-                    <p className="text-sm text-muted-foreground">{supplement.category}</p>
+                    <p className="text-sm text-muted-foreground">{supplement.dosage}</p>
                   </div>
                 </div>
               ))}
@@ -101,7 +101,9 @@ const SupplementComparison = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     {supplement.name}
-                    <Badge variant="outline">{supplement.category}</Badge>
+                    <Badge className={getEvidenceColor(supplement.evidence)}>
+                      {supplement.evidence}
+                    </Badge>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     {supplement.description}
@@ -122,11 +124,6 @@ const SupplementComparison = () => {
                   <div>
                     <h3 className="font-semibold text-foreground mb-2">Recommended Dosage</h3>
                     <p className="text-sm text-muted-foreground">{supplement.dosage}</p>
-                    {supplement.timing && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        <span className="font-medium">Timing:</span> {supplement.timing}
-                      </p>
-                    )}
                   </div>
 
                   <Separator />
@@ -147,10 +144,16 @@ const SupplementComparison = () => {
                   <Separator />
 
                   {/* Precautions */}
-                  {supplement.precautions && (
+                  {supplement.precautions && supplement.precautions.length > 0 && (
                     <div>
                       <h3 className="font-semibold text-foreground mb-2">Precautions</h3>
-                      <p className="text-sm text-muted-foreground">{supplement.precautions}</p>
+                      <ul className="space-y-1">
+                        {supplement.precautions.slice(0, 3).map((precaution, idx) => (
+                          <li key={idx} className="text-sm text-muted-foreground">
+                            • {precaution}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
 
