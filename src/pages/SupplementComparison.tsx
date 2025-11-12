@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { getEvidenceBadgeColor } from "@/utils/supplementUtils";
 
 const SupplementComparison = () => {
   const navigate = useNavigate();
@@ -23,19 +24,6 @@ const SupplementComparison = () => {
   const compareData = supplements.filter(s =>
     selectedSupplements.includes(s.slug)
   );
-
-  const getEvidenceColor = (evidence: string) => {
-    switch (evidence.toLowerCase()) {
-      case "strong":
-        return "bg-green-500/20 text-green-700 dark:text-green-300";
-      case "moderate":
-        return "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300";
-      case "limited":
-        return "bg-orange-500/20 text-orange-700 dark:text-orange-300";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -101,7 +89,7 @@ const SupplementComparison = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     {supplement.name}
-                    <Badge className={getEvidenceColor(supplement.evidence)}>
+                    <Badge className={getEvidenceBadgeColor(supplement.evidence)}>
                       {supplement.evidence}
                     </Badge>
                   </CardTitle>
@@ -113,7 +101,7 @@ const SupplementComparison = () => {
                   {/* Evidence Level */}
                   <div>
                     <h3 className="font-semibold text-foreground mb-2">Evidence Level</h3>
-                    <Badge className={getEvidenceColor(supplement.evidence)}>
+                    <Badge className={getEvidenceBadgeColor(supplement.evidence)}>
                       {supplement.evidence}
                     </Badge>
                   </div>
